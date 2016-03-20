@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/security
+	   http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+
+	<!-- Configure to plugin JSON as request and response in method handler -->
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<beans:property name="messageConverters">
+			<beans:list>
+				<beans:ref bean="jsonMessageConverter" />
+				<beans:ref bean="csvMessageConverter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Configure bean to convert JSON to POJO and vice versa -->
+	<beans:bean id="jsonMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<beans:property name="prefixJson" value="false" />
+		<beans:property name="supportedMediaTypes" value="application/json" />
+	</beans:bean>
+
+	<beans:bean id="csvMessageConverter"
+		class="com.counterapi.rest.converter.WordCountCSVConverter">
+		<beans:property name="supportedMediaTypes" value="text/csv" />
+	</beans:bean>
+
+	<!-- Configure bean to read data. If any other reader has to be provided, chnage this bean definition -->
+	<beans:bean id="fileReader" class="com.counterapi.rest.reader.FileDataReader"
+		scope="singleton">
+		<beans:property name="filePath" value="input.txt" />
+	</beans:bean>
+
+	<!-- Filter definition for spring security -->
+	<beans:bean id="springSecurityFilterChain"
+		class="org.springframework.web.filter.DelegatingFilterProxy" />
+
+	<!-- All controllers are placed under base-package -->
+	<context:component-scan base-package="com.counterapi.rest.controller" />
+
+</beans:beans>
